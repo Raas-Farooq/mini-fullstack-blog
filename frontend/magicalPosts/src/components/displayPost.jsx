@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom";
 import VITE_API_URL from '../components/../config';
+import ReactQuill from "react-quill";
+// import 'react-quill/dist/quill.snow.css';
 import axios from "axios";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import {MdDelete, MdEdit} from "react-icons/md"
@@ -24,12 +26,9 @@ function DisplayPost(){
                 console.log("response of the api: ", response);
                 if(response.data.success){
                     const blog = response.data.blog;
-                     blog.content.map(content => {
-                        // const newText= content.textContent.replace(/!\[image\]\([^)]*\)/g, 'Image-Index');
-                        const newText = content.textContent;                       
-                        const paragraphs = newText.split(/(!\[image\]\([^)]*\))/g);
-                        const processedContent = paragraphs.map((paragraph,ind) => {
-                            // console.log("paragraphHHH ", paragraph)
+                    const content = blog.content[0].textContent;
+                    const paragraphs = content.split(/(!\[image\]\([^)]*\))/g);
+                        const processedContent = paragraphs.map((paragraph,ind) => {  
                             if(paragraph.startsWith("![image]")){
 
                                 return (
@@ -45,9 +44,8 @@ function DisplayPost(){
                             }
                             
                         })
-
+                        console.log("processed Content: ", processedContent);
                         setProcessedContent(processedContent);
-                    });
                 }
                 setPost(response.data.blog);
             }
@@ -90,9 +88,8 @@ function DisplayPost(){
                         </div>
                         )
                     }
-            </div>
-
-        </div>
+            </div> 
+     </div>
     )
 }
 

@@ -16,21 +16,24 @@ export default function Navbar() {
         const handleAboutUs = () => {
 
 
-            function printPyramid(n){
-                if(n <= 0){
-                    return 0;
-                }
-
-                printPyramid(n-1);`                                                                                         `                                                                                                   
-                let pattern = '';
-                for(let i =0;i< n; i++){
-                    pattern += '*';
-                }
-                console.log(pattern);
+            function printPyramid(){
+                const data = [
+                    "Today's life lesson emphasizes the importance of paying attention to your thoughts ![image]-1343 when you're alone and practicing positive self-talk to influence your emotions and behaviors positively Additionally,![image]-1345 it's crucial to be mindful of your words when interacting with others,![image]-1366 as they can significantly impact relationships and personal growth.![image]-1327 Another lesson is to focus on the present moment, avoiding dwelling on the past or worrying excessively about the future, which can prevent you from enjoying life's current experiences.These lessons encourage self-awareness, positive communication, and mindfulness, all of which can enhance personal well-being and interpersonal relationships."]
+                    const sections = data[0].split(/(!\[image\]-\d+)/g);
+                    console.log("sections: ", sections);
+                    const joinedContent = sections.map((section, index) => {
+                        if(section.startsWith('![image]')){
+                            return <img
+                            alt={`${index}-${section}`}
+                            />
+                        }
+                        return <p key={`text-${index}`}>{section} </p>
+                    })
+                    console.log("joinedContent: ", joinedContent);
                     
             }
 
-            console.log(printPyramid(4))
+        printPyramid()
 
         //     function pattern(num){
 

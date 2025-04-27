@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "frontend":"cd frontend/magicalPosts && npm run dev",
-    "backend":"cd Backend && nodemon server.js",
+    "frontend": "cd frontend/magicalPosts && npm run dev",
+    "backend": "cd Backend && nodemon server.js",
     "dev": "concurrently \" npm run frontend \"  \" npm run backend \" "
   },
   "keywords": [],
@@ -13,6 +13,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "react-quill": "^2.0.0"
   }
 }
