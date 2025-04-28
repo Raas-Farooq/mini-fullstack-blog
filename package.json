@@ -13,7 +13,6 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "concurrently": "^9.1.2",
-    "react-quill": "^2.0.0"
+    "concurrently": "^9.1.2"
   }
 }
