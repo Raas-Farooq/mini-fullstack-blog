@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
-import VITE_API_URL from '../config';
+import VITE_API_URL from '../../config.js';
 import ReactQuill from "react-quill";
 import 'react-quill/dist/quill.snow.css';
+import './edit.css';
+
 
 const EditPost = () => {
     const location = useLocation();
@@ -48,12 +50,12 @@ const EditPost = () => {
         Object.entries(post.contentImagesUrls).forEach(([placeholder,url]) => {
             console.log("placeholder: inside entry ", placeholder);
             const data_id = placeholder.match(/!\[image\]\((\d+)\)/)[1];
-            const replacement=`<img src="${url}" alt="${placeholder}" className="h-44 w-44" data-id="${data_id}" />`;
-            
+            const replacement=`<img src="${url}" alt="${placeholder}" data-id="${data_id}" />`;   
             bodyText = bodyText.replace(RegExp(escapeRegExp(placeholder), 'g'), replacement);
-            console.log("bodyText inside entries; ", bodyText);
         })
-        console.log("bodyText after Object.enties: ", bodyText);
+        const titleImage= `<img src="${VITE_API_URL}/uploads/${post.titleImage}" alt="TitleImage" />`
+        const title= ` <h2 className="font-bold"> ${post.title} </h2>`
+        bodyText = title + titleImage + bodyText;
         // console.log("bodyText: after replace", bodyText);
         setQuillContent(bodyText)
         setPostData(prev => ({
@@ -67,11 +69,11 @@ const EditPost = () => {
        }
     },[post])
 
-    // useEffect(() => {
-    //     if(quillContent){
-    //         console.log("quill content: ", quillContent);
-    //     }
-    // },[quillContent])
+    useEffect(() => {
+        if(postData){
+            console.log("post data inside useEffect ",postData);
+        }
+    },[postData])
 
 
     function handleTitleChange(e){
@@ -85,7 +87,8 @@ const EditPost = () => {
     }
 
     const handleContentChange = function(newContent){
-        setQuillContent(newContent)
+        console.log("new Content in Handle change ", newContent)
+        setQuillContent(newContent);
         setPostData(prev => ({
             ...prev,
             content:[{textContent:newContent}]
@@ -93,7 +96,7 @@ const EditPost = () => {
     }
     return (
         <div className="prose prose-lg max-w-full">
-            {console.log("quillContent: DOm", quillContent)}
+            {/* {console.log("quillContent: DOm", quillContent)} */}
             {loadingPost && <h1> Post is being Loading..</h1>}
             <ReactQuill
                 theme="snow"
@@ -117,18 +120,3 @@ const EditPost = () => {
 }
 
 export default EditPost
-
-
-{/* <form type="Post" className="text-left space-y-4">
-                <label> Edit Your title  </label>
-                <input type='text' name='title' value={postData.title} className="border border-gray-700 w-1/2" 
-                onChange={handleTitleChange} />
-                {post.titleImage && 
-                <img src={`${VITE_API_URL}/uploads/${postData.titleImage}`} className="w-28 h-32"/>
-                }
-                <input type="file" name="image" accept="/*image" />
-                <div>
-                    <textarea cols={55} rows={18} className="border border-gray-700" value={postData.content} />
-                </div>
-                
-            </form> */}

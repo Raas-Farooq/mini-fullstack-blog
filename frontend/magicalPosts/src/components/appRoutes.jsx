@@ -4,7 +4,7 @@ import App from '../App';
 import NewBlog from './newBlog';
 import DisplayBlogs from './displayBlogs';
 import DisplayPost from './displayPost';
-import EditPost from './editPost.jsx';
+import EditPost from './editingPost/editPost.jsx';
 
 const AppRoutes = () => {
 
