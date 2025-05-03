@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaBars, FaTimes } from "react-icons/fa";
+import { FaBars, FaCommentsDollar, FaTimes } from "react-icons/fa";
 import clsx from 'clsx';
 import { useNavigate } from "react-router-dom";
 
@@ -15,63 +15,6 @@ export default function Navbar() {
 
         const handleAboutUs = () => {
             
-            function countOnes(){ 
-                const nums= [1,1,0,1,1,1]
-                let maxCount=0;
-                let count=0;
-                const arrLength=nums.length;
-                for(let z=0; z<arrLength; z++){
-                 if(nums[z] === 1){
-                   count++;
-                 }
-                 else {
-                    if(maxCount < count){
-                        maxCount=count;
-                    }
-                    count=0
-                  }
-                  
-                }
-                console.log("countOnes", maxCount);
-             }
-        countOnes()
-            function printPyramid(){
-                const arr= [5, 5, 3,8, 9,5, 0,5, 5, 55,5,5,5,5,5,5,5,7];
- 
-                let maxCount=0;
-                let count=0;
-                const arrLength=arr.length;
-                for(let z=0; z<arrLength; z++){
-                 if(arr[z] === 5){
-                    while(arr[z] === 5 && z < arrLength){
-                        count++;
-                        z++;
-                    } 
-                    
-                 }
-                 if(maxCount < count){
-                    maxCount=count;
-                    }
-
-                count=0;
-                }
-                console.log("5 maximum consectively showing", maxCount);
-                     
-             }
-        printPyramid()
-
-        //     function pattern(num){
-
-        //         for(let i = 0; i < num; i++){
-        //             let symbol = '';
-        //             for(let j=0; j<= i; j++){
-        //                 symbol = symbol + '@';
-        //             }
-        //             console.log(symbol);
-        //         }
-        //     }
-
-        //     pattern(6)
         }
 
     return (

@@ -1,16 +1,27 @@
 
 
-.ql-editor img{
+.ql-editor p img{
     width: 100%;
-    max-width:30rem !important;
+    max-width:25rem !important;
     height:auto;
-    max-height:30rem !important;
+    max-height:30rem ;
     border-radius:0.5rem;
     display: block;
     margin:1rem auto;
     object-fit: contain;
+    margin:auto 0;
 }
 
+.ql-editor img[alt="TitleImage"]{
+    width:100%;
+    max-width:80% !important;
+    max-height:30rem ;
+    height:auto;
+    border-radius:1rem;
+    margin:auto 0;
+}
+
+  
 .ql-editor p{
     font-size: larger;
 }
@@ -18,4 +29,3 @@
     font-weight: bold;
 }
 
-/* // i want to have some differnt style for any specific image how can i do that since now each image is getting the same styling */

@@ -1,9 +1,9 @@
 import express from 'express';
-import { registerUser, allUsers, loginUser, createBlog, uploadContentImage, allBlogs, accessPost } from '../controller/controller.js';
+import { registerUser, allUsers, loginUser, createBlog, allBlogs, accessPost } from '../controller/controller.js';
 import {body} from 'express-validator';
 import { loginValidation, registerValidation, createBlogValidation } from '../validators/authValidators.js';
 import { upload } from './uploads.js';
-
+import uploadContentImage from '../controller/cloudinaryUploads/uploadContentImage.js';
 
 const router = express.Router();
 

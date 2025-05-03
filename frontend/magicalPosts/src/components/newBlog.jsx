@@ -123,7 +123,6 @@ export default function NewBlog(){
         }
         reader.readAsDataURL(image)
      }
-
      const getStoredTitleImage = async () => {
         const base64String = localStorage.getItem('previewTitleImage');
         console.log("base64 string: ", base64String);
@@ -195,12 +194,13 @@ export default function NewBlog(){
                 return imageResponse.data.url
             }
             catch(err){
-                console.log("got Error while posting: ", err);
+                console.log("got Error while posting on  Cloudinary ", err);
                 return null
             }
         }
 
         const imgFile = e.target.files[0];
+        console.log("imgFile before appending: ", imgFile)
         if(imgFile){
             console.log("contentImage as formImg befre appending ", imgFile)
             const formData = new FormData();

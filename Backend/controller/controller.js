@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt';
 import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import { strict } from "assert";
-import {v2 as cloudinary} from 'cloudinary';
+// import {v2 as cloudinary} from 'cloudinary';
 import path from "path";
 
 
@@ -83,29 +83,7 @@ const loginUser = async(req,res,next) => {
     }
 }
 
-const uploadContentImage = async(req,res) => {
-    const image = req.file.path;
-    cloudinary.config({
-        cloud_name: 'dk9guj9vd',
-        api_key: '679969866855214',
-        api_secret:'KLFSinQdB0uj7hJJeEEl1NIoRyg'
-    })
-        try{
-            const cloudImageResult = await cloudinary.uploader.upload(
-                image,{
-                    folder:'ContentImages'
-                }
-            ).catch(err => console.log("err while uploading on cloudinary: ", err))
-        
-            console.log("cloudImageResult ", cloudImageResult);
 
-        console.log("Upload Image Has RuN!");
-            res.status(200).json({success:true, message:"Image Successfully Uploaded", url:cloudImageResult.secure_url, public_id:cloudImageResult.public_id})
-        }   
-        catch(err){
-            console.log("err while uploading on cloudinary: ", err)
-        }
-    }
     const accessPost = async (req,res) => {
         console.log("accessPost has been Strengthened")
         const id = req.params.id;
@@ -238,6 +216,6 @@ const allUsers = async(req,res) => {
         next(err)
     }
 }
-export {registerUser, allUsers, loginUser, createBlog, uploadContentImage,allBlogs, accessPost};
+export {registerUser, allUsers, loginUser, createBlog,allBlogs, accessPost};
 
 
