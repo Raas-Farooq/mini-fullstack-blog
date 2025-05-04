@@ -181,6 +181,9 @@ export default function NewBlog(){
         setLoading(true);
 
         async function getImageUrl(formImage){
+            formImage.forEach((value, key)=> {
+                console.log("key: ", key, " value : ", value);
+            })
             
             try{
                 const imageResponse = await axios.post('http://localhost:3700/blog/uploadContentImage', formImage,
@@ -200,7 +203,7 @@ export default function NewBlog(){
         }
 
         const imgFile = e.target.files[0];
-        console.log("imgFile before appending: ", imgFile)
+        // console.log("imgFile before appending: ", imgFile)
         if(imgFile){
             console.log("contentImage as formImg befre appending ", imgFile)
             const formData = new FormData();
@@ -250,7 +253,6 @@ export default function NewBlog(){
        
         const currentValue = e.target.value;
         const placeholders = Object.keys(contentImagesUrls);
-        console.log("Object.keys placeholders: ", placeholders);
     
         const isPlaceholderModified = placeholders.some((placeholder) => {
             return !currentValue.includes(placeholder)

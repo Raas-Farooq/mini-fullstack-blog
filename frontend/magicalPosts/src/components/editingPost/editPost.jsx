@@ -4,7 +4,7 @@ import VITE_API_URL from '../../config.js';
 import ReactQuill from "react-quill";
 import 'react-quill/dist/quill.snow.css';
 import './edit.css';
-
+import axios from 'axios';
 
 const EditPost = () => {
     const location = useLocation();
@@ -126,42 +126,62 @@ const EditPost = () => {
     //     });
     //   },[]);
       const quillImageHandling = useCallback(() => {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-        input.onchange = async() => {
+        return new Promise((resolve) => {
+            const input = document.createElement('input');
+            input.setAttribute('type', 'file');
+            input.setAttribute('accept', 'image/*');
+            input.click();
+            input.onchange = async() => {
             const file = input.files[0];
             console.log("file received: ", file)
             if(!file){
+                resolve(null);
                 return;
+                
             }
             
             const uploadCloudinary = async(file) => {
                 try{
                     const formData = new FormData();
                     formData.append('contentImage', file);
-                    const response = await axios.post(`${VITE_API_URL}/blog/uploadContentImage`,{
-                        formData,
-                        Headers:
+                    formData.forEach((value, key )=> {
+                        console.log("key: ", key ,": ", value)
+                    })
+                    console.log(`file ${file} `);
+                    const response = await axios.post(`${VITE_API_URL}/blog/uploadContentImage`,formData, {
+                        headers:
                         {
-                            "Content-Type":"multipart-formData"
+                            "Content-Type":"multipart/form-data"
                         }
                     });
-                    console.log("response: of cloudinary: ", response);
+                    if(response.data.success){
+                        const quill = quillRef.current?.getEditor();
+                        const range = quill.getSelection();
+                        const [block] = quill.getLine(range.index);
+                        if (block && block.domNode.tagName === 'H2') {
+                            alert('Cannot insert images inside the title area');
+                            resolve(null);
+                            return;
+                        }
+                        const myContentImage = `</br> ` + `<img src="${response.data.url}" alt="contentImage" />` + `</br>`
+                        quill.setSelection(range);
+                        quill.insertEmbed(range.index, 'image', response.data.url, 'user');
+                        quill.setSelection(range.index + 1);
+                        
+                       resolve(response.data.url);
+                    }else{
+                        resolve(null)
+                    }
                 }
                 catch(err){
-                    console.log('receive frontEnd error while uploading on cloudinary', err)
+                    console.log('receive frontEnd error while uploading on cloudinary', err);
+                    resolve(null);
                 }
             }
 
             uploadCloudinary(file)
-            const quill = quillRef.current?.getEditor();
-            const range = quill.getSelection();
-
-            quill.insertEmbed(range, file)
-          
-        }
+            }
+        })
       },[]) 
 
     const handleContentChange = function(newContent){
@@ -200,7 +220,7 @@ const EditPost = () => {
                             ['clean']
                        ],
                        handlers:{
-                        image:quillImageHandling
+                        image: quillImageHandling
                        }
                     }
                 }}

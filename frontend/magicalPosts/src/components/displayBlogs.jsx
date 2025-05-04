@@ -13,7 +13,7 @@ const DisplayBlogs = () => {
     const clearLocalStorage = useCallback(() => {
         localStorage.removeItem('title');
         localStorage.removeItem('titleImage');
-        localStorage.removeItem('content');
+        localStorage.removeItem('textContent');
         localStorage.removeItem('contentImagesUrls');
         localStorage.removeItem('postId');
         localStorage.removeItem('previewTitleImage');

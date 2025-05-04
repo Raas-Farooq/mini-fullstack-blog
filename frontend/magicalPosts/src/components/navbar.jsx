@@ -57,3 +57,27 @@ export default function Navbar() {
 
 // className={clsx
 //     ('hidden flex sm:flex sm:w-full sm:justify-center ', menuVisible ? 'block flex flex-col ' : 'hidden')}>
+
+// contentImage as formImg befre appending  
+// File {name: 'comfort zone.jpg', lastModified: 1728897784071, lastModifiedDate: Mon Oct 14 2024 14:23:04 GMT+0500 (Pakistan Standard Time), webkitRelativePath: '', size: 48411, …}
+// lastModified
+// : 
+// 1728897784071
+// lastModifiedDate
+// : 
+// Mon Oct 14 2024 14:23:04 GMT+0500 (Pakistan Standard Time) {}
+// name
+// : 
+// "comfort zone.jpg"
+// size
+// : 
+// 48411
+// type
+// : 
+// "image/jpeg"
+// webkitRelativePath
+// : 
+// ""
+// [[Prototype]]
+// : 
+// File

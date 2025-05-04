@@ -1,6 +1,7 @@
 import {v2 as cloudinary} from 'cloudinary';
 
 const uploadContentImage = async(req,res) => {
+    console.log("req file: ", req.file);
     const image = req.file.path;
     console.log("image inside backend uploadContent: ", image);
     cloudinary.config({
