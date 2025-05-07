@@ -14,8 +14,71 @@ export default function Navbar() {
         }
 
         const handleAboutUs = () => {
+        //     function bubbleSort(arr){
+        //         let count = 0;
+        //         const arrLength=arr.length;
+        //         for(let i=0; i< arrLength; i++){
+        //             console.log("i value; ", i);
+        //             let swapped=false;
+        //             for(let j=0; j< arrLength-i-1; j++){
+        //                 count++;
+        //                 if(arr[j] > arr[j+1]){
+        //                     let temp = arr[j];
+        //                     arr[j] = arr[j+1];
+        //                     arr[j+1] = temp;
+        //                     swapped = true;
+        //                 }
+        //             }
+        //             if(!swapped){
+        //                 console.log("arry is sorted", arr)
+        //                 return arr;
+        //             }
+                    
+        //         }
+        //     }
+        //     const arr = [1,2,3,4,3,6,99,11, 5,8]
+        //    const sortedArr= bubbleSort(arr)
+        //     console.log("sorted: arr ", sortedArr);
+        //     if(sortedArr){
+        //         function binarySearch(sortedArr){
+        //             let count = 0;
+        //             let start = 0;
+        //             let end= sortedArr.length - 1;
+        //             const found = 1;
+        //             while(start<= end){
+        //                 let mid = Math.floor((start+end)/2);
+        //                 console.log('count ', ++count)
+        //                 if(sortedArr[mid] === found){
+        //                     console.log("number found ");
+        //                     return;
+        //                 }
+        //                 if(sortedArr[mid] < found){
+        //                     start = mid +1;
+        //                 }
+        //                 if(sortedArr[mid] > found){
+        //                     end=mid-1;
+        //                 }
+        //             }
+        //             console.log("Number Not found")
+        //         }
+
+        //         binarySearch(sortedArr)
+        //     }
             
-        }
+        const arr=[1,2,4,3,5, 10, 7, 2];
+        const num = arr.length-1;
+ 
+        function multiply(num){
+                if(num <= 0){
+                    return 1;
+                }
+
+                const result = arr[num] * multiply(num - 1);
+                
+                return result;
+            }
+        console.log("multiply result: ", multiply(num));
+    }
 
     return (
         <nav className="w-full left-2 p-4 flex justify-between right-4 top-5 absolute bg-white text-gray-800 ">

@@ -13,6 +13,7 @@ const EditPost = () => {
 
     const quillRef=useRef();
     const [loadingPost, setLoadingPost] = useState(null);
+    const [cloudinaryUpload, setCloudinaryUpload] = useState();
     const [quillContent, setQuillContent] = useState([]);
     const [postData, setPostData] = useState({
         title:'',
@@ -56,12 +57,30 @@ const EditPost = () => {
             bodyText = bodyText.replace(RegExp(escapeRegExp(placeholder), 'g'), replacement);
         })
         const title = `<h2 id="title" class="font-bold">${post.title}</h2>`;
-        const titleImage = `<img style="width:100%; max-width:100px" src="${VITE_API_URL}/uploads/${post.titleImage}" alt="TitleImage" />`;
+        const titleImage = `<img data-role="title-image" src="${VITE_API_URL}/uploads/${post.titleImage}" alt="TitleImage" />`;
+        const quill = quillRef.current.getEditor();
+        const titleh2 = `
+        <h2 id="title">${post?.title}</h2>
+       `
+       let titleImageHTML;
+       if(post?.titleImage){
+      titleImageHTML=`<img 
+            src="${VITE_API_URL}/uploads/${post?.titleImage}" 
+            data-role="title-image" 
+            class="title-image" 
+            contenteditable="false"
+        />
+        `
+       }
 
-        bodyText = title + "<br/>" + titleImage + "<br/>" + `<article> ${bodyText} </article>`;
+
+        const html = titleh2 + titleImageHTML + bodyText;
+        
+        quill.root.innerHTML = html;
+        // bodyText = title + `<article> ${bodyText} </article>`;
         // const updatedText = title+titleImage + bodyText;
-        console.log("bodyText: after adding title titleImage", bodyText);
-        setQuillContent(bodyText)
+        console.log("all HTML: after adding titleImage + bodyText", html);
+        setQuillContent(html)
         setPostData(prev => ({
             ...prev,
             title:post?.title || '',
@@ -80,8 +99,8 @@ const EditPost = () => {
     // })
     useEffect(() => {
         if(postData){
-            console.log("post data inside useEffect ",postData);
-        }
+            
+            }
     },[postData])
 
 
@@ -94,37 +113,6 @@ const EditPost = () => {
         }))
         localStorage.setItem('title', JSON.stringify(newTitle));
     }
-    // const quillImageHandling = useCallback(() => {
-    //     return new Promise((resolve) => {
-    //       const input = document.createElement('input');
-    //       input.setAttribute('type', 'file');
-    //       input.setAttribute('accept', 'image/*');
-    //       input.click();
-      
-    //       input.onchange = async () => {
-    //         const file = input.files[0];
-    //         console.log("file: ", file);
-    //         const formData = new FormData();
-
-    //         formData.append('contentImage',  file);
-    //         const quill = quillRef.current?.getEditor();
-    //         const range = quill.getSelection();
-    //         quill.insertText(range.index, 'GreatEST FIGHT');
-    //         console.log("current cursor: ", quill.getSelection);
-    //         if (!file) return;
-      
-    //         try {
-    //           // Here you would typically upload the file to your server
-    //           // For now, we'll use a local object URL as placeholder
-    //           const imageUrl = URL.createObjectURL(file);
-    //           resolve(imageUrl);
-    //         } catch (error) {
-    //           console.error('Image upload error:', error);
-    //           resolve(null);
-    //         }
-    //       };
-    //     });
-    //   },[]);
       const quillImageHandling = useCallback(() => {
         return new Promise((resolve) => {
             const input = document.createElement('input');
@@ -139,7 +127,19 @@ const EditPost = () => {
                 return;
                 
             }
-            
+            const quill = quillRef.current?.getEditor();
+            const range = quill.getSelection();
+            const [block] = quill.getLine(range.index);
+            const isInTitle = block && block.domNode.tagName === 'H2';
+            const content = quill.getContents()
+            const hasTitleImage = content.ops.some(op => op.insert?.image?.attributes?.['data-role']==='title-image')
+            const isNearTitleImage = quill.getText(range.index - 10, 20).includes('data-role="title-image"');
+            console.log("is Near Title: ", isNearTitleImage, "hasTitleImage: ", hasTitleImage);
+            if (isInTitle || hasTitleImage && range.index < 400) {
+                alert('Cannot insert images in the title or title image area!');
+                resolve(null);
+                return;
+            }
             const uploadCloudinary = async(file) => {
                 try{
                     const formData = new FormData();
@@ -147,7 +147,7 @@ const EditPost = () => {
                     formData.forEach((value, key )=> {
                         console.log("key: ", key ,": ", value)
                     })
-                    console.log(`file ${file} `);
+                    setCloudinaryUpload(true);
                     const response = await axios.post(`${VITE_API_URL}/blog/uploadContentImage`,formData, {
                         headers:
                         {
@@ -155,14 +155,6 @@ const EditPost = () => {
                         }
                     });
                     if(response.data.success){
-                        const quill = quillRef.current?.getEditor();
-                        const range = quill.getSelection();
-                        const [block] = quill.getLine(range.index);
-                        if (block && block.domNode.tagName === 'H2') {
-                            alert('Cannot insert images inside the title area');
-                            resolve(null);
-                            return;
-                        }
                         const myContentImage = `</br> ` + `<img src="${response.data.url}" alt="contentImage" />` + `</br>`
                         quill.setSelection(range);
                         quill.insertEmbed(range.index, 'image', response.data.url, 'user');
@@ -176,6 +168,8 @@ const EditPost = () => {
                 catch(err){
                     console.log('receive frontEnd error while uploading on cloudinary', err);
                     resolve(null);
+                }finally{
+                    setCloudinaryUpload(false);
                 }
             }
 
@@ -201,8 +195,23 @@ const EditPost = () => {
     }
     return (
         <div className="prose prose-lg max-w-full">
-            {/* {console.log("quillContent: DOm", quillContent)} */}
-            {/* {loadingPost && <h1> Post is being Loading..</h1>} */}
+            {console.log("post: DOm", post)}
+            <button>        
+                {post?.titleImage ? 'Change Title Image': 'Add Title Image' }
+            </button>
+            {/* {
+                post?.titleImage && 
+                <img 
+                src={`${VITE_API_URL}/uploads/${post?.titleImage}`}
+                alt='title-image'
+                data-role="title-image"
+                />
+            } */}
+            {cloudinaryUpload && (
+            <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center align-center">
+                <h2 className="text-white text-2xl">UPLOADING TO CLOUDINARY...</h2>
+            </div>
+            )}
             <ReactQuill
                 ref={quillRef}
                 theme="snow"
