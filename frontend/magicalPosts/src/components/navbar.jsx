@@ -14,70 +14,86 @@ export default function Navbar() {
         }
 
         const handleAboutUs = () => {
-        //     function bubbleSort(arr){
-        //         let count = 0;
-        //         const arrLength=arr.length;
-        //         for(let i=0; i< arrLength; i++){
-        //             console.log("i value; ", i);
-        //             let swapped=false;
-        //             for(let j=0; j< arrLength-i-1; j++){
-        //                 count++;
-        //                 if(arr[j] > arr[j+1]){
-        //                     let temp = arr[j];
-        //                     arr[j] = arr[j+1];
-        //                     arr[j+1] = temp;
-        //                     swapped = true;
-        //                 }
-        //             }
-        //             if(!swapped){
-        //                 console.log("arry is sorted", arr)
-        //                 return arr;
-        //             }
-                    
-        //         }
-        //     }
-        //     const arr = [1,2,3,4,3,6,99,11, 5,8]
-        //    const sortedArr= bubbleSort(arr)
-        //     console.log("sorted: arr ", sortedArr);
-        //     if(sortedArr){
-        //         function binarySearch(sortedArr){
-        //             let count = 0;
-        //             let start = 0;
-        //             let end= sortedArr.length - 1;
-        //             const found = 1;
-        //             while(start<= end){
-        //                 let mid = Math.floor((start+end)/2);
-        //                 console.log('count ', ++count)
-        //                 if(sortedArr[mid] === found){
-        //                     console.log("number found ");
-        //                     return;
-        //                 }
-        //                 if(sortedArr[mid] < found){
-        //                     start = mid +1;
-        //                 }
-        //                 if(sortedArr[mid] > found){
-        //                     end=mid-1;
-        //                 }
-        //             }
-        //             console.log("Number Not found")
-        //         }
-
-        //         binarySearch(sortedArr)
-        //     }
             
-        const arr=[1,2,4,3,5, 10, 7, 2];
-        const num = arr.length-1;
- 
-        function multiply(num){
-                if(num <= 0){
-                    return 1;
+            function mergeArrays(arr1,arr2){
+                let i=0; let j=0;
+                let merged=[];
+                const arr1_len = arr1.length;
+                const arr2_len = arr2.length;
+                console.log("array 1", arr1, "array 2: ", arr2, "arr1 leng ", arr1_len, " arr2_len ", arr2_len);
+                while(i < arr1_len && j < arr2_len){
+                    if(arr2[j] < arr1[i]){
+                        console.log("j: ", j , "arr2[value] ", arr2[j]);
+                        if(!(arr2[j] === 0)){
+                            merged.push(arr2[j]);
+                            j++
+                        }
+                        else{
+                            j++
+                        }
+                    }
+                    else{
+                        if(arr1[i] === 0){
+                            i++
+                        }else{
+                            merged.push(arr1[i]);
+                            i++;
+                        }
+                    }
                 }
 
-                const result = arr[num] * multiply(num - 1);
-                
-                return result;
+                while(i < arr1_len){
+                    merged.push(arr1[i]);
+                    i++;
+                }
+                while(j < arr2_len){
+                    // console.log("j: ", j);
+                    merged.push(arr2[j]);
+                    j++;
+                }
+
+                return merged;
             }
-        console.log("multiply result: ", multiply(num));
+
+            const first = [3, 8, 35]; const second = [23, 55, 72,  91,99];
+
+            console.log("result ", mergeArrays(first,second));
+            // function doubleZero(my_array){
+            //     let zeroCount = 0;
+            //     my_array.forEach(num => {
+            //         if(num===0){
+            //             zeroCount++;
+            //         }
+            //     })
+            //     const storedZeroCount= zeroCount;
+            //     let array_length = my_array.length;
+            //     let lastPos = array_length-1;
+            //     while(zeroCount > 0 && lastPos >= 0){
+            //         if(my_array[lastPos] === 0){
+            //             zeroCount--;
+            //         }
+            //         lastPos--
+            //     }
+
+            //     let readPos = array_length - storedZeroCount - 1;
+            //     let writePos= array_length - 1;
+            //     console.log(`readPos ${readPos} writePos ${writePos} zroCoutn ${storedZeroCount} lastPos ${lastPos}`)
+            //     while(readPos > lastPos){
+            //         if(my_array[readPos] === 0){
+            //             my_array[writePos] = 0;
+            //             writePos--
+            //         }else{
+            //             my_array[writePos] = my_array[readPos];
+            //         }
+            //         writePos--;
+            //         readPos--;
+            //     }
+
+            //     console.log("updated array with double zeros", my_array)
+            // }
+            // const arr = [2, 13, 29, 0, 35, 0, 3, 9, 6];
+            // doubleZero(arr);
+            
     }
 
     return (

@@ -6,6 +6,7 @@ import errorLogger from './middleware/errorLogger.js';
 import logger from "./middleware/logger.js";
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
+import path from "path";
 
 
 const port = 3700;
@@ -16,7 +17,9 @@ databaseJoined();
 app.use(logger);
 app.use(cookieParser());
 app.use(errorLogger);
-app.use('/uploads', express.static('/home/raas/Programming/Pro Full-Stack Dev /Blog App/Backend/uploads'))
+const __dirname=path.resolve();
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+// app.use('/uploads', express.static('/home/raas/Programming/ProFull-StackDev/Blog App/Backend/uploads'))
 app.use('/blog', router);
 app.listen(port, function() {
     console.log("PORT Is Running On: ", port)

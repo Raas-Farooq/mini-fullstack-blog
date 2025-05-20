@@ -29,3 +29,19 @@
     font-weight: bold;
 }
 
+
+/* const array = [3, 8, 1, 88, 23, 42, 33, 9, 73];
+
+        const topSorting = (arr) => {
+            if(arr.length < 2){
+                return 0;
+            }
+            debugger
+            const mid = Math.floor(arr.length / 2);
+            let firstHalf= arr.slice(0, mid);
+            let secondHalf =arr.slice(mid);
+            console.log("firstHalf: ", firstHalf);
+            console.log("second Half: ", secondHalf);
+            return topSorting(firstHalf), topSorting(secondHalf);
+        }
+topSorting(array) */

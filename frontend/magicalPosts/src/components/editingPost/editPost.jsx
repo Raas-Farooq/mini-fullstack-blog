@@ -13,27 +13,96 @@ const EditPost = () => {
 
     const quillRef=useRef();
     const [loadingPost, setLoadingPost] = useState(null);
+    // const [titleImagePreview, setTitleImagePreview] = useState('');
+    const [titleImageChanges, setTitleImageChanged] =useState(false);
     const [cloudinaryUpload, setCloudinaryUpload] = useState();
+    const [updatedImagesUrls, setUpdatedImagesUrls] = useState({});
     const [quillContent, setQuillContent] = useState([]);
     const [postData, setPostData] = useState({
         title:'',
-        titleImage:'',
+        titleImage:null,
         content:[{}],
+        titleImagePreview:'',
         contentImagesUrls:{}
     })
+    const escapeRegExp = (string) => {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+
+    function UrlsToImages(urls,bodyText){
+        Object.entries(urls).forEach(([placeholder,url]) => {
+            const data_id = placeholder.match(/!\[image\]\((\d+)\)/)[1];
+            const replacement=`<img src="${url}" alt="${placeholder}" data-id="${data_id}" />`;   
+            bodyText = bodyText.replace(RegExp(escapeRegExp(placeholder), 'g'), replacement);
+            return bodyText;
+        })
+    }
+     function base64ToFile(base64, filename, mimeType) {
+        const arr = base64.split(',');
+        const mime = mimeType || arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new File([u8arr], filename, { type: mime });
+    }
+
     useEffect(() => {
-        
-        // const post = location.state?.post;
-        console.log("post: Editing ", post, 'id ', id);
-       if(!post){
-        function fetchPost(){
+        const localTitleImage= JSON.parse(localStorage.getItem('titleImage'));
+        const localTitle= JSON.parse(localStorage.getItem('title'));
+        const localTextContent= JSON.parse(localStorage.getItem('content'));
+        const localQuillContent= JSON.parse(localStorage.getItem('quillContent'));
+        const localImagePreview= JSON.parse(localStorage.getItem('titleImagePreview'));
+        const contentImagesUrls = JSON.parse(localStorage.getItem('contentImagesUrls'));
+        // if(!localImagePreview.startsWith('http')){
+           
+        // }
+        if(localTitle || localTextContent || localTitleImage || localQuillContent || localImagePreview){
+            setPostData(prev => {return {
+                ...prev,
+                title:localTitle || '',
+                content:localTextContent || [{}],
+                titleImage:localTitleImage || '',
+                titleImagePreview:localImagePreview,
+                contentImagesUrls:contentImagesUrls || {}
+            }})
+            if(localQuillContent){
+                console.log("local Quill Content: ", localQuillContent);
+                setQuillContent(localQuillContent);
+            }
+            // const bodyText= localTextContent[0].textContent;
+            // const updatedContent = UrlsToImages(contentImagesUrls, bodyText);
+            
+            // const quill = quillRef.current.getEditor();
+            // console.log("updatedcontent: ", updatedContent)
+            // quill.root.innerHTML = updatedContent;
+            // setQuillContent(updatedContent);
+        }
+       else{
+        async function fetchPost(){
             setLoadingPost(true);
             try{
-                const response = axios.get(`${VITE_API_URL}/blog/getPost/${id}`);
+                const response = await axios.get(`${VITE_API_URL}/blog/getPost/${id}`);
 
                 if(response.data.success){
                     
                     setPost(response.data.blog);
+                    const myPost = response.data.blog;
+                    let bodyText = myPost.content[0].textContent;
+                    const updatedContent = UrlsToImages(myPost.contentImagesUrls, bodyText);
+                    const quill = quillRef.current.getEditor();      
+                    quill.root.innerHTML = updatedContent;
+                    setQuillContent(updatedContent);
+                    setPostData(prev => ({
+                        ...prev,
+                        title:myPost?.title || '',
+                        content:myPost?.content[0].textContent || [{}],
+                        contentImagesUrls:myPost.contentImagesUrls || {},
+                        titleImagePreview:`${VITE_API_URL}/uploads/${encodeURIComponent(myPost?.titleImage)}` || '',
+                        titleImage:myPost?.titleImage || ''
+                    }))
                 }
             }catch(err){
                 console.error(' err while fetching post inside Edit Component ', err);
@@ -44,68 +113,15 @@ const EditPost = () => {
         }
         fetchPost();
        }
-       const escapeRegExp = (string) => {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-       if(post){
-        let bodyText = post.content[0].textContent;
-        // console.log("initial ", bodyText)
-        Object.entries(post.contentImagesUrls).forEach(([placeholder,url]) => {
-            console.log("placeholder: inside entry ", placeholder);
-            const data_id = placeholder.match(/!\[image\]\((\d+)\)/)[1];
-            const replacement=`<img src="${url}" alt="${placeholder}" data-id="${data_id}" />`;   
-            bodyText = bodyText.replace(RegExp(escapeRegExp(placeholder), 'g'), replacement);
-        })
-        const title = `<h2 id="title" class="font-bold">${post.title}</h2>`;
-        const titleImage = `<img data-role="title-image" src="${VITE_API_URL}/uploads/${post.titleImage}" alt="TitleImage" />`;
-        const quill = quillRef.current.getEditor();
-        const titleh2 = `
-        <h2 id="title">${post?.title}</h2>
-       `
-       let titleImageHTML;
-       if(post?.titleImage){
-      titleImageHTML=`<img 
-            src="${VITE_API_URL}/uploads/${post?.titleImage}" 
-            data-role="title-image" 
-            class="title-image" 
-            contenteditable="false"
-        />
-        `
-       }
-
-
-        const html = titleh2 + titleImageHTML + bodyText;
-        
-        quill.root.innerHTML = html;
-        // bodyText = title + `<article> ${bodyText} </article>`;
-        // const updatedText = title+titleImage + bodyText;
-        console.log("all HTML: after adding titleImage + bodyText", html);
-        setQuillContent(html)
-        setPostData(prev => ({
-            ...prev,
-            title:post?.title || '',
-            content:post?.content[0].textContent || [{}],
-            contentImagesUrls:post.contentImagesUrls || {},
-            titleImage:post?.titleImage || ''
-        }))
-
-       }
     },[post])
-    // useEffect(() => {
-    //     const locallyQuillContent=JSON.parse(localStorage.getItem('quillContent'));
-    //     if(locallyQuillContent){
-    //         console.log("locallyQuillContent: ", locallyQuillContent);
-    //     }
-    // })
+
+
     useEffect(() => {
-        if(postData){
-            
-            }
-    },[postData])
+       console.log("updateImagesUrls ", updatedImagesUrls);
+    },[updatedImagesUrls])
 
 
     function handleTitleChange(e){
-        console.log("handle Titchle chagne running ", e.target.value)
         const newTitle = e.target.value;
         setPostData(prev => ({
            ...prev,
@@ -113,6 +129,7 @@ const EditPost = () => {
         }))
         localStorage.setItem('title', JSON.stringify(newTitle));
     }
+
       const quillImageHandling = useCallback(() => {
         return new Promise((resolve) => {
             const input = document.createElement('input');
@@ -121,7 +138,6 @@ const EditPost = () => {
             input.click();
             input.onchange = async() => {
             const file = input.files[0];
-            console.log("file received: ", file)
             if(!file){
                 resolve(null);
                 return;
@@ -129,24 +145,11 @@ const EditPost = () => {
             }
             const quill = quillRef.current?.getEditor();
             const range = quill.getSelection();
-            const [block] = quill.getLine(range.index);
-            const isInTitle = block && block.domNode.tagName === 'H2';
             const content = quill.getContents()
-            const hasTitleImage = content.ops.some(op => op.insert?.image?.attributes?.['data-role']==='title-image')
-            const isNearTitleImage = quill.getText(range.index - 10, 20).includes('data-role="title-image"');
-            console.log("is Near Title: ", isNearTitleImage, "hasTitleImage: ", hasTitleImage);
-            if (isInTitle || hasTitleImage && range.index < 400) {
-                alert('Cannot insert images in the title or title image area!');
-                resolve(null);
-                return;
-            }
             const uploadCloudinary = async(file) => {
                 try{
                     const formData = new FormData();
                     formData.append('contentImage', file);
-                    formData.forEach((value, key )=> {
-                        console.log("key: ", key ,": ", value)
-                    })
                     setCloudinaryUpload(true);
                     const response = await axios.post(`${VITE_API_URL}/blog/uploadContentImage`,formData, {
                         headers:
@@ -155,7 +158,10 @@ const EditPost = () => {
                         }
                     });
                     if(response.data.success){
-                        const myContentImage = `</br> ` + `<img src="${response.data.url}" alt="contentImage" />` + `</br>`
+                        console.log("response.data.url: ", response.data.url);
+                        // const imageAlt = `![image](${new Date().getTime().toString()})`
+                        // const myContentImage =  `<img src="${response.data.url}" alt="${imageAlt}" />`;
+                        // console.log("myContentImage: ", myContentImage);
                         quill.setSelection(range);
                         quill.insertEmbed(range.index, 'image', response.data.url, 'user');
                         quill.setSelection(range.index + 1);
@@ -178,35 +184,98 @@ const EditPost = () => {
         })
       },[]) 
 
-    const handleContentChange = function(newContent){
-        // console.log("new Content in Handle change ", newContent);
-        const parsing = new DOMParser();
 
-        const DOMDocument = parsing.parseFromString(newContent, "text/html");
-        const titleRetrieved= DOMDocument.querySelector('h2');
-        console.log("title retrieved: ", titleRetrieved);
-        setQuillContent(newContent);
-        localStorage.setItem('quillContent', JSON.stringify(newContent));
-        setPostData(prev => ({
-            ...prev,
-            content:[{textContent:newContent}]
-        }))
-        console.log("data : after Change ",newContent );
-    }
+      const handleImageChange = (e) => {
+        const image = e.target.files[0];
+        console.log("image : ", image);
+        ImageReader(image);
+        setTitleImageChanged(true);
+      }
+      const ImageReader = (image) =>{
+        const file_reader = new FileReader;
+
+        file_reader.onload = (event) => {
+            const base64Image= event.target.result;
+            setPostData(prev => ({
+                ...prev,
+                titleImage:image,
+                titleImagePreview:base64Image
+            }))
+            const newImage = {
+                name:image.name,
+                size:image.size,
+                type:image.type,
+                date:image.lastModifiedDate
+            }
+            localStorage.setItem('titleImage', JSON.stringify(newImage));
+            localStorage.setItem('titleImagePreview', JSON.stringify(base64Image))
+        }
+        file_reader.readAsDataURL(image);
+      }
+
+     
+
+      const handleContentChange = useCallback((newContent) => {
+          setPostData(prev => ({
+              ...prev,
+              content: [{textContent: newContent}]
+          }));
+          localStorage.setItem('quillContent', JSON.stringify(newContent));
+          setQuillContent(newContent);
+      }, []);
+
+      function handleSubmit(e){
+        e.preventDefault();
+        const imagePreview = JSON.parse(localStorage.getItem('titleImagePreview'));
+        const titleImage = JSON.parse(localStorage.getItem('titleImage'));
+        console.log("submit Clicked postData ", postData, "image Previe: ", imagePreview);
+        const quillContent = JSON.parse(localStorage.getItem('quillContent'));
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(quillContent, 'text/html');
+        const images = doc.querySelectorAll('img');
+        let newContentImagesUrls={};
+        images.forEach(image => {
+            // console.log("foreach : ", image.src ,"alt", image.alt);
+            if(!image.alt){
+                const newPlaceholder = '![image]' + `(${new Date().getTime().toString()})`;
+                newContentImagesUrls[newPlaceholder] = image.src;
+            }
+            else{
+                newContentImagesUrls[image.alt] = image.src;
+            }
+
+            console.log("newContentImagesUrls: ", newContentImagesUrls);
+            setUpdatedImagesUrls(newContentImagesUrls);
+            localStorage.setItem('contentImagesUrls', JSON.stringify(newContentImagesUrls));
+        })
+
+        if(!imagePreview.startsWith('http') || imagePreview.startsWith('data:image')){
+             const newImageFile = base64ToFile(imagePreview, titleImage.name);
+            console.log("newImagePreview: ", newImageFile);
+        }
+      }
     return (
-        <div className="prose prose-lg max-w-full">
-            {console.log("post: DOm", post)}
-            <button>        
-                {post?.titleImage ? 'Change Title Image': 'Add Title Image' }
-            </button>
-            {/* {
-                post?.titleImage && 
-                <img 
-                src={`${VITE_API_URL}/uploads/${post?.titleImage}`}
-                alt='title-image'
-                data-role="title-image"
-                />
-            } */}
+        <div className="prose prose-lg max-w-full relative space-y-4">
+            {/* console.log("How simple DOM: ",updatedImagesUrls); */}
+            <div className="text-left">
+                <label className="font-bold"> Change Your Title </label>
+                { post?.title && <input 
+                type="text" name="title" 
+                value={postData.title} 
+                onChange={handleTitleChange} 
+                className="border border-gray-600 p-2" /> }
+            </div>
+
+            <div className="mb-2">
+                {postData?.titleImagePreview && <img src={postData.titleImagePreview} alt="TitleImage" className="max-w-md"/>}
+            </div>
+            <div className="space-y-3 mb-3 w-full max-h-xl text-left">
+                <label className="bg-green-500 rounded-lg cursor-pointer transition-transform hover:bg-green-600 p-2"> 
+                    <input type="file" accept="image/*"  onChange={handleImageChange} className="hidden" />       
+                    change TitleImage
+                </label>
+            </div>
+            <h3 className="font-bold text-left mt-2">Body Content</h3>
             {cloudinaryUpload && (
             <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center align-center">
                 <h2 className="text-white text-2xl">UPLOADING TO CLOUDINARY...</h2>
@@ -235,6 +304,9 @@ const EditPost = () => {
                 }}
 
             />
+            <footer>
+                <button onClick={handleSubmit} className="bg-blue-400 border border-blue-500 rounded-lg shadow-lg hover:bg-blue-600">saveChanges</button>
+            </footer>
             
         </div>
     )

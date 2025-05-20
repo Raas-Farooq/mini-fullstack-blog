@@ -13,10 +13,11 @@ const DisplayBlogs = () => {
     const clearLocalStorage = useCallback(() => {
         localStorage.removeItem('title');
         localStorage.removeItem('titleImage');
-        localStorage.removeItem('textContent');
+        localStorage.removeItem('content');
         localStorage.removeItem('contentImagesUrls');
         localStorage.removeItem('postId');
-        localStorage.removeItem('previewTitleImage');
+        localStorage.removeItem('quillContent');
+        localStorage.removeItem('titleImagePreview');
     }, [])
     
     useEffect(() => {
