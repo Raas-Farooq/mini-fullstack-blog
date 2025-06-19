@@ -199,7 +199,80 @@ const allBlogs = async(req,res) => {
     }
 }
 
+const updateBlog = async(req,res) => {
 
+    try{
+        const {id} = req.params;
+        const {title, content, contentImagesUrls} = req.body;
+        let contentImages = [];
+        try{
+            contentImages = JSON.parse(contentImagesUrls);
+        }catch(err){
+            contentImages = []
+        }
+        // or 
+        // let contentImagesUrls = [];
+        // try {
+        //     contentImagesUrls = JSON.parse(req.body.contentImagesUrls);
+        // } catch (e) {
+        //     contentImagesUrls = [];
+        // }
+        console.log("Id after params: ", id, "Req.body: ",req.body);
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            return res.status(400).json({
+                success:false,
+                message:"Got Validation Errors", 
+                erros: errors.array()
+            })
+        }
+        const updatedData = req.body;
+        const image = req.file? req.file.path  : '';
+        console.log("titleIMage: ", titleImage)
+        // console.log("req body data; IMage",  "contentImageUrls: ", JSON.parse(contentImagesUrls));
+        const blog = await postModel.findOne({_id: id});
+        if(!blog){
+            return res.status(404).json({
+                success:false,
+                message:"Blog Not found"
+
+            })
+        }
+
+        const updatePost = await postModel.updateOne(
+            {_id:id},
+            {$set:{updatedData}},
+            {new:true}  
+        )
+        // let newTitle = "";
+        // let newImageLink = "";
+        // let newContent  = [{textContent:''}];
+        // let newContentImagesUrls={};
+        // if(updatedData.title) {
+        //     newTitle=updatePost.title
+        // }
+        //  if(updatedData.titleImage) {
+        //     newImageLink=updatePost.title
+        // }
+        // //  if(updatePost.content) {
+        // //     const newContent=updatePost.title
+        // // }
+        //  if(updatedData.contentImagesUrls) {
+        //     newContentImagesUrls=updatePost.title
+        // }
+        return res.status(200).json({
+            success:true,
+            message:"Blog updated Successfully"
+        })
+    }
+    catch(err){
+        return res.status(500).json({
+            success:false,
+            message:"Server error while updating Post",
+            error:err.message
+        })
+    }
+}
 const allUsers = async(req,res) => {
     try{
         const findUsers = await userModel.find({});
@@ -216,6 +289,7 @@ const allUsers = async(req,res) => {
         next(err)
     }
 }
-export {registerUser, allUsers, loginUser, createBlog,allBlogs, accessPost};
+
+export {registerUser, allUsers, loginUser, createBlog,allBlogs, accessPost, updateBlog};
 
 

@@ -19,7 +19,6 @@ function DisplayPost(){
         console.log("id received : ", id);
 
         async function accessPost(){
-
             try{
                 console.log("viteApi Url ", VITE_API_URL);
                 const response= await axios.get(`${VITE_API_URL}/blog/accessPost/${id}`);
@@ -40,7 +39,7 @@ function DisplayPost(){
                                     />
                                 )
                             }else{
-                                return (<p key={`p-${ind}`} className="text-left"> {paragraph} </p>)
+                                return (<p key={`p-${ind}`} className="text-left text-black"> {paragraph} </p>)
                             }
                             
                         })

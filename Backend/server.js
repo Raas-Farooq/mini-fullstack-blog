@@ -11,7 +11,15 @@ import path from "path";
 
 const port = 3700;
 const app = express();
-app.use(cors());
+const myOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'http://localhost:5172'
+]
+const origins = {
+    origin:myOrigins
+}
+app.use(cors(origins));
 app.use(express.json());
 databaseJoined();
 app.use(logger);

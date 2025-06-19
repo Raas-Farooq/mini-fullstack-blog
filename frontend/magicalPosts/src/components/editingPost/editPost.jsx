@@ -13,8 +13,11 @@ const EditPost = () => {
 
     const quillRef=useRef();
     const [loadingPost, setLoadingPost] = useState(null);
+    const [updatingPost, setUpdatingPost] = useState(false);
     // const [titleImagePreview, setTitleImagePreview] = useState('');
     const [titleImageChanges, setTitleImageChanged] =useState(false);
+    const [dirtyFields, setDirtyFields] = useState({});
+    const [newContent, setNewContent] = useState([{}]);
     const [cloudinaryUpload, setCloudinaryUpload] = useState();
     const [updatedImagesUrls, setUpdatedImagesUrls] = useState({});
     const [quillContent, setQuillContent] = useState([]);
@@ -69,7 +72,6 @@ const EditPost = () => {
                 contentImagesUrls:contentImagesUrls || {}
             }})
             if(localQuillContent){
-                console.log("local Quill Content: ", localQuillContent);
                 setQuillContent(localQuillContent);
             }
             // const bodyText= localTextContent[0].textContent;
@@ -123,6 +125,10 @@ const EditPost = () => {
 
     function handleTitleChange(e){
         const newTitle = e.target.value;
+        setDirtyFields(prev => ({
+            ...prev,
+            title:true
+        }))
         setPostData(prev => ({
            ...prev,
            title:newTitle 
@@ -158,15 +164,18 @@ const EditPost = () => {
                         }
                     });
                     if(response.data.success){
-                        console.log("response.data.url: ", response.data.url);
-                        // const imageAlt = `![image](${new Date().getTime().toString()})`
-                        // const myContentImage =  `<img src="${response.data.url}" alt="${imageAlt}" />`;
-                        // console.log("myContentImage: ", myContentImage);
+                        const altText = `![image](${Date.now()})`;
                         quill.setSelection(range);
                         quill.insertEmbed(range.index, 'image', response.data.url, 'user');
+                        quill.formatText(range.index, 1, {
+                            alt:altText
+                        })
                         quill.setSelection(range.index + 1);
-                        
-                       resolve(response.data.url);
+                        resolve(response.data.url);
+                        setDirtyFields(prev => ({
+                            ...prev,
+                            contentImagesUrls:true
+                        }))
                     }else{
                         resolve(null)
                     }
@@ -187,13 +196,15 @@ const EditPost = () => {
 
       const handleImageChange = (e) => {
         const image = e.target.files[0];
-        console.log("image : ", image);
         ImageReader(image);
         setTitleImageChanged(true);
+        setDirtyFields(prev => ({
+            ...prev,
+            titleImage:true
+        }))
       }
       const ImageReader = (image) =>{
         const file_reader = new FileReader;
-
         file_reader.onload = (event) => {
             const base64Image= event.target.result;
             setPostData(prev => ({
@@ -213,50 +224,116 @@ const EditPost = () => {
         file_reader.readAsDataURL(image);
       }
 
-     
 
       const handleContentChange = useCallback((newContent) => {
-          setPostData(prev => ({
-              ...prev,
-              content: [{textContent: newContent}]
-          }));
           localStorage.setItem('quillContent', JSON.stringify(newContent));
+          setDirtyFields(prev => ({
+            ...prev,
+            content:true
+        }))
           setQuillContent(newContent);
       }, []);
 
-      function handleSubmit(e){
+      function extractTextWithLineBreaks(element) {
+        let result = "";
+
+            element.childNodes.forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE) {
+                    result += node.textContent;
+                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                    const tag = node.tagName.toLowerCase();
+
+                    if (['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)) {
+                        result += extractTextWithLineBreaks(node).trim() + "\n";
+                    } else if (tag === 'br') {
+                        result += "\n";
+                    } else {
+                        result += extractTextWithLineBreaks(node);
+                    }
+                }
+                });
+                return result.trim();
+        }
+
+
+      async function handleSubmit(e){
+  
         e.preventDefault();
         const imagePreview = JSON.parse(localStorage.getItem('titleImagePreview'));
         const titleImage = JSON.parse(localStorage.getItem('titleImage'));
-        console.log("submit Clicked postData ", postData, "image Previe: ", imagePreview);
         const quillContent = JSON.parse(localStorage.getItem('quillContent'));
+
+        // defining the Parser using DOMParser
         const parser = new DOMParser();
+        // converting the text (quillContent which contains tags 'p','h2') to html Doc 
         const doc = parser.parseFromString(quillContent, 'text/html');
+        const quill = quillRef.current?.getEditor();
         const images = doc.querySelectorAll('img');
         let newContentImagesUrls={};
+
+      console.log("ID inside submit: ",id);
         images.forEach(image => {
-            // console.log("foreach : ", image.src ,"alt", image.alt);
-            if(!image.alt){
-                const newPlaceholder = '![image]' + `(${new Date().getTime().toString()})`;
-                newContentImagesUrls[newPlaceholder] = image.src;
-            }
-            else{
-                newContentImagesUrls[image.alt] = image.src;
-            }
-
-            console.log("newContentImagesUrls: ", newContentImagesUrls);
-            setUpdatedImagesUrls(newContentImagesUrls);
-            localStorage.setItem('contentImagesUrls', JSON.stringify(newContentImagesUrls));
+            const placeholder = image.alt || `![image](${Date.now()})`;
+            newContentImagesUrls[placeholder]=image.src;
+            image.alt=placeholder;
+            image.replaceWith(placeholder);
         })
+        // removing and cleaning the html tags like 'div,p, h2 etc'
+        
+        const removedTags = extractTextWithLineBreaks(doc.body).trim();
 
-        if(!imagePreview.startsWith('http') || imagePreview.startsWith('data:image')){
-             const newImageFile = base64ToFile(imagePreview, titleImage.name);
-            console.log("newImagePreview: ", newImageFile);
+        setPostData((prev) => ({
+            ...prev,
+            content:[{textContent:removedTags}]
+        }))
+        const formData = new FormData();  
+        formData.append('contentImagesUrls', newContentImagesUrls);
+        const myContent = JSON.parse(localStorage.getItem('content'));
+         const originalContent = removeSpaces(myContent[0].textContent);
+         function removeSpaces(content){
+            return content.replace(/\s+/g, " ").trim();
+         }
+        if(originalContent !== removedTags[0].textContent){
+            alert('Not equal')
+        }else{
+            console.log("texts are same")
         }
+        formData.append('content', removedTags);
+        formData.append('title', postData.title);
+        setUpdatedImagesUrls(newContentImagesUrls);
+        localStorage.setItem('contentImagesUrls', JSON.stringify(newContentImagesUrls));
+        if(imagePreview && (imagePreview.startsWith('data:image') || !imagePreview.startsWith('http'))){
+            const newImageFile = base64ToFile(imagePreview, titleImage.name);
+            formData.append('titleImage', newImageFile);
+        }
+        formData.entries((key, value) => {
+            console.log("before SUBMISSION key", key, "Value: ", value);
+        })
+        try{
+            setUpdatingPost(true);
+            const response = await axios.put(`${VITE_API_URL}/blog/updateBlog/${id}`, formData,
+                {
+                    headers:{
+                        "Content-Type":"multipart/form-data"
+                    }
+                }
+            );
+            console.log("response ", response);
+        }catch(err){
+            console.log("got error while updating the Post ", err);
+        }
+        finally{
+            setUpdatingPost(false)
+        }
+        
       }
     return (
         <div className="prose prose-lg max-w-full relative space-y-4">
-            {/* console.log("How simple DOM: ",updatedImagesUrls); */}
+            {updatingPost && <div className="fixed inset-0 bg-black opacity-50 z-50 flex justify-center items-center">
+                    <div className="bg-white text-black flex justify-center items-center text-2xl shadow-lg rounded-lg">
+                        <h1>Updating Post</h1>
+                    </div>
+                </div>}
             <div className="text-left">
                 <label className="font-bold"> Change Your Title </label>
                 { post?.title && <input 

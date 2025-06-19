@@ -41,9 +41,12 @@ const useLocalPostData = (post) => {
         }
         if(localPost?.content){
             const mainContent=localPost.content[0].textContent;
+            const parser = new DOMParser();
            const transformedContent=UrlsToImages(localPost.contentImagesUrls, mainContent);
-            console.log("transform content: ", transformedContent);
-           savingDataLocally("quillContent", transformedContent);
+           const contentWithBreaks = transformedContent.replace(/\n/g, '<br>');
+        //    const html_form = parser.parseFromString(replacingBreaks, 'text/html');
+            console.log("contentWithBreaks ", contentWithBreaks);
+           savingDataLocally("quillContent", contentWithBreaks);
         }
     },[localPost])
     const savingDataLocally = (key, value) => {
