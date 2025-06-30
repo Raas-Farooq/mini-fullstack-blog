@@ -139,6 +139,7 @@ const createBlog = async(req,res,next) => {
         }
         // const imagesOfContent = req.files['contentImages']? req.files['contentImages'].map(img => img.path): []
         const parsedImagesUrls = JSON.parse(contentImagesUrls);
+        console.log("parsedImagesUrls ", parsedImagesUrls);
         const parsedContent = JSON.parse(content);
         console.log("imagePath: ", imagePath);
         const basePath = path.basename(imagePath);
@@ -203,21 +204,14 @@ const updateBlog = async(req,res) => {
 
     try{
         const {id} = req.params;
+        // console.log("req.body: ", req.body);
         const {title, content, contentImagesUrls} = req.body;
-        let contentImages = [];
+        let contentImages={};
         try{
             contentImages = JSON.parse(contentImagesUrls);
         }catch(err){
-            contentImages = []
+            contentImages = {}
         }
-        // or 
-        // let contentImagesUrls = [];
-        // try {
-        //     contentImagesUrls = JSON.parse(req.body.contentImagesUrls);
-        // } catch (e) {
-        //     contentImagesUrls = [];
-        // }
-        console.log("Id after params: ", id, "Req.body: ",req.body);
         const errors = validationResult(req);
         if(!errors.isEmpty()){
             return res.status(400).json({
@@ -226,10 +220,8 @@ const updateBlog = async(req,res) => {
                 erros: errors.array()
             })
         }
-        const updatedData = req.body;
-        const image = req.file? req.file.path  : '';
-        console.log("titleIMage: ", titleImage)
-        // console.log("req body data; IMage",  "contentImageUrls: ", JSON.parse(contentImagesUrls));
+        const image = req.file? req.file.path  : req.body.titleImage;
+        const basePath = path.basename(image);
         const blog = await postModel.findOne({_id: id});
         if(!blog){
             return res.status(404).json({
@@ -239,30 +231,32 @@ const updateBlog = async(req,res) => {
             })
         }
 
-        const updatePost = await postModel.updateOne(
-            {_id:id},
-            {$set:{updatedData}},
-            {new:true}  
+        let newContent  = [{textContent:content}];
+        const updatedData = {
+            title,
+            content:newContent,
+            contentImagesUrls:contentImages,
+            titleImage:basePath
+        }
+        console.log("updated Data before updation: ", updatedData);
+
+        const updateMyPost = await postModel.updateOne(
+                {_id:id},
+                {$set:updatedData},
+                {new:true}
         )
-        // let newTitle = "";
-        // let newImageLink = "";
-        // let newContent  = [{textContent:''}];
-        // let newContentImagesUrls={};
-        // if(updatedData.title) {
-        //     newTitle=updatePost.title
-        // }
-        //  if(updatedData.titleImage) {
-        //     newImageLink=updatePost.title
-        // }
-        // //  if(updatePost.content) {
-        // //     const newContent=updatePost.title
-        // // }
-        //  if(updatedData.contentImagesUrls) {
-        //     newContentImagesUrls=updatePost.title
-        // }
+        console.log("Update MY POst result: ", updateMyPost);
+        const getUpdatedBlog = await postModel.findOne({_id: id});
+        if(!getUpdatedBlog){
+            return res.status(404).json({
+                success:false,
+                message:"not found newly updated Post"
+            })
+        }
         return res.status(200).json({
             success:true,
-            message:"Blog updated Successfully"
+            message:"Blog updated Successfully",
+            getUpdatedBlog
         })
     }
     catch(err){

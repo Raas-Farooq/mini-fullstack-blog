@@ -26,8 +26,10 @@ function DisplayPost(){
                 if(response.data.success){
                     const blog = response.data.blog;
                     const content = blog.content[0].textContent;
-                    const paragraphs = content.split(/(!\[image\]\([^)]*\))/g);
-                        const processedContent = paragraphs.map((paragraph,ind) => {  
+                    let processedContent;
+                    if(blog.contentImagesUrls){
+                        const paragraphs = content.split(/(!\[image\]\([^)]*\))/g);
+                        processedContent = paragraphs.map((paragraph,ind) => {  
                             if(paragraph.startsWith("![image]")){
 
                                 return (
@@ -43,8 +45,10 @@ function DisplayPost(){
                             }
                             
                         })
-                        console.log("processed Content: ", processedContent);
-                        setProcessedContent(processedContent);
+                    }
+                    
+                    console.log("processed Content: ", processedContent);
+                    setProcessedContent(processedContent);
                 }
                 setPost(response.data.blog);
             }
@@ -61,7 +65,7 @@ function DisplayPost(){
     // useEffect(() => {
        
     //     useLocalPostData(post);
-    // }, [])
+    // }, [])<img src="http://localhost:3700/uploads2025-04-21T01-35-41.837Z-Weak Fall strong stand.webp" alt="titleImage" class="w-52 h-52">
 
     const handleEditPost = (e,id) => {
         e.stopPropagation();
@@ -69,7 +73,7 @@ function DisplayPost(){
     }
     return (
         <div>
-            {/* {console.log("loading ", loading, "post DOM processedContent: ",processedContent)} */}
+            {console.log("post Loading: ",`${VITE_API_URL}/uploads${post?.titleImage}`)}
             {loading && <h1 className="text-center">Loading..</h1>}
             <div className={`${loading && 'hidden'}`}>
                 <button onClick={(e) => handleEditPost(e, post._id)} className="shadow-2xl rounded-lg hover:bg-gray-200"> <MdEdit /> </button>
@@ -77,8 +81,10 @@ function DisplayPost(){
             </div>
             <h2 className="strong font-bold border-b border-green-500 shadow-full">{post?.title} </h2>
             <div className={`h-screen p-2 ${loading ? 'bg-transparent' : 'bg-gray-100'}  `}>
-                    {post?.titleImage && 
+                    {(!post?.titleImage.startsWith('http')) ? 
                     <img src={`${VITE_API_URL}/uploads/${post?.titleImage}`} alt="titleImage" className="w-52 h-52"/> 
+                    :
+                    <img src={post.titleImage} alt="titleImage" className="w-52 h-52" />
                     }
                     {!processedContent ? 'Loading Content' : 
                         (

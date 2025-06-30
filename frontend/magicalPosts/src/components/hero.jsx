@@ -1,20 +1,14 @@
+import { useEffect } from "react"
 
 
 export default function Hero() {
 
-        function deliberate(){
-            const obj = {first:1, last: 'go',
-                third:{
-                    run: () => {
-                        return "Running.."
-                    }
-                    
-                }
-            }
-            console.log("USE YOUR BRAIN: ", obj.third.run())
-        }
-
-        deliberate();
+        useEffect(() => {
+            localStorage.removeItem('previewTitleImage');
+            localStorage.removeItem('textContent');
+            localStorage.removeItem('titleImg');
+            localStorage.removeItem('contentImagesUrls');
+        })
     return (
         <>
             <h2> Are You Believer in Allah (SWT)</h2>

@@ -53,6 +53,7 @@ const EditPost = () => {
     }
 
     useEffect(() => {
+        console.log("id from useParams inside EditPost:", id);
         const localTitleImage= JSON.parse(localStorage.getItem('titleImage'));
         const localTitle= JSON.parse(localStorage.getItem('title'));
         const localTextContent= JSON.parse(localStorage.getItem('content'));
@@ -93,7 +94,8 @@ const EditPost = () => {
                     setPost(response.data.blog);
                     const myPost = response.data.blog;
                     let bodyText = myPost.content[0].textContent;
-                    const updatedContent = UrlsToImages(myPost.contentImagesUrls, bodyText);
+                    let updatedContent;
+                    if(myPost.contentImagesUrls) {updatedContent = UrlsToImages(myPost.contentImagesUrls, bodyText)};
                     const quill = quillRef.current.getEditor();      
                     quill.root.innerHTML = updatedContent;
                     setQuillContent(updatedContent);
@@ -287,7 +289,7 @@ const EditPost = () => {
             content:[{textContent:removedTags}]
         }))
         const formData = new FormData();  
-        formData.append('contentImagesUrls', newContentImagesUrls);
+        formData.append('contentImagesUrls', JSON.stringify(newContentImagesUrls));
         const myContent = JSON.parse(localStorage.getItem('content'));
          const originalContent = removeSpaces(myContent[0].textContent);
          function removeSpaces(content){
@@ -305,6 +307,8 @@ const EditPost = () => {
         if(imagePreview && (imagePreview.startsWith('data:image') || !imagePreview.startsWith('http'))){
             const newImageFile = base64ToFile(imagePreview, titleImage.name);
             formData.append('titleImage', newImageFile);
+        }else{
+            formData.append('titleImage', imagePreview);
         }
         formData.entries((key, value) => {
             console.log("before SUBMISSION key", key, "Value: ", value);

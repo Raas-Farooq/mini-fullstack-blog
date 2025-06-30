@@ -7,6 +7,7 @@ const useLocalPostData = (post) => {
 
     useEffect(() => {
         if(post){
+            console.log("post: ", post);
             setLocalPost(post)
         }
         
@@ -42,8 +43,19 @@ const useLocalPostData = (post) => {
         if(localPost?.content){
             const mainContent=localPost.content[0].textContent;
             const parser = new DOMParser();
-           const transformedContent=UrlsToImages(localPost.contentImagesUrls, mainContent);
-           const contentWithBreaks = transformedContent.replace(/\n/g, '<br>');
+            let transformedContent, contentWithBreaks;
+            // if(localPost.contentImagesUrls && Object.keys(localPost?.contentImagesUrls.length > 0 || {}));
+            console.log("using object.jkeys ", Object.keys(localPost?.contentImagesUrls || {}).length)
+            if(Object.keys(localPost?.contentImagesUrls || {}).length  > 0){
+                transformedContent=UrlsToImages(localPost.contentImagesUrls, mainContent);
+                contentWithBreaks = transformedContent.replace(/\n/g, '<br>');
+            }
+           else{
+
+            contentWithBreaks = localPost.content.replace(/\n/g, '<br>');
+            console.log("contentWith Breaks: ", contentWithBreaks);
+           }
+           
         //    const html_form = parser.parseFromString(replacingBreaks, 'text/html');
             console.log("contentWithBreaks ", contentWithBreaks);
            savingDataLocally("quillContent", contentWithBreaks);
