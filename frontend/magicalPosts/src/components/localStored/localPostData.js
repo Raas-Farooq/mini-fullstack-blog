@@ -42,27 +42,27 @@ const useLocalPostData = (post) => {
         }
         if(localPost?.content){
             const mainContent=localPost.content[0].textContent;
-            const parser = new DOMParser();
             let transformedContent, contentWithBreaks;
             // if(localPost.contentImagesUrls && Object.keys(localPost?.contentImagesUrls.length > 0 || {}));
             console.log("using object.jkeys ", Object.keys(localPost?.contentImagesUrls || {}).length)
             if(Object.keys(localPost?.contentImagesUrls || {}).length  > 0){
                 transformedContent=UrlsToImages(localPost.contentImagesUrls, mainContent);
                 contentWithBreaks = transformedContent.replace(/\n/g, '<br>');
+                savingDataLocally('quillContent', contentWithBreaks);
             }
            else{
-
-            contentWithBreaks = localPost.content.replace(/\n/g, '<br>');
+            console.log("content: localPost  before error ", localPost.content);
+            contentWithBreaks = localPost.content[0].textContent.replace(/\n/g, '<br>');
             console.log("contentWith Breaks: ", contentWithBreaks);
-           }
-           
-        //    const html_form = parser.parseFromString(replacingBreaks, 'text/html');
-            console.log("contentWithBreaks ", contentWithBreaks);
-           savingDataLocally("quillContent", contentWithBreaks);
+            if(contentWithBreaks){
+                console.log("alert because contentWithBreaks contains the data ");
+                savingDataLocally("quillContent", contentWithBreaks);
+            }
+        }
         }
     },[localPost])
     const savingDataLocally = (key, value) => {
-
+        console.log("value: before sving", value)
         try{
             if(!value || value === 'undefined'){
                 console.error('value is undefined or empty');

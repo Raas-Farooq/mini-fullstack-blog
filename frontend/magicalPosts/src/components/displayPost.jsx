@@ -10,6 +10,7 @@ import useLocalPostData from "./localStored/localPostData";
 
 function DisplayPost(){
     const [loading, setLoading] = useState(true);
+    const [deleteLoading, setDeleteLoading] = useState(false);
     const [post, setPost] = useState(null);
     const [processedContent, setProcessedContent] = useState(null);
     const {id} = useParams(); 
@@ -20,14 +21,16 @@ function DisplayPost(){
 
         async function accessPost(){
             try{
-                console.log("viteApi Url ", VITE_API_URL);
                 const response= await axios.get(`${VITE_API_URL}/blog/accessPost/${id}`);
                 console.log("response of the api: ", response);
                 if(response.data.success){
                     const blog = response.data.blog;
                     const content = blog.content[0].textContent;
+                    console.log("content: before processing Content", content);
                     let processedContent;
+                    console.log("blog.contentImagesUrls ;", blog.contentImagesUrls)
                     if(blog.contentImagesUrls){
+                        // alert('blog.contentImages exist')
                         const paragraphs = content.split(/(!\[image\]\([^)]*\))/g);
                         processedContent = paragraphs.map((paragraph,ind) => {  
                             if(paragraph.startsWith("![image]")){
@@ -45,10 +48,19 @@ function DisplayPost(){
                             }
                             
                         })
+                    }else{
+                        // alert("else runs ");
+                        console.log("content   before settttting ", content);
+                        const paragraphs= content.split('\n');
+                        const processed = paragraphs.map((para,ind) => (
+                            <p key={`p-${ind}`} className="text-left text-black">{para}</p>
+                        ))
+                        console.log("processed: ", processed);
+                        setProcessedContent(processed)
                     }
                     
-                    console.log("processed Content: ", processedContent);
-                    setProcessedContent(processedContent);
+                    // console.log("processed Content: ", processedContent);
+                    // setProcessedContent(processedContent);
                 }
                 setPost(response.data.blog);
             }
@@ -71,13 +83,32 @@ function DisplayPost(){
         e.stopPropagation();
         navigateTo(`/edit/${id}`, {state: { post : {...post} } });
     }
+    const handleDelete = async(e, id) => {
+        e.preventDefault();
+        setDeleteLoading(true)
+        try{
+              const deleteResponse = await axios.delete(`${VITE_API_URL}/blog/deleteBlog/${id}`);
+              console.log("deleteResponse ", deleteResponse);
+                if(deleteResponse.data.success){
+                    
+                alert("successfully deleted the data");
+                navigateTo('/')
+            }
+        }
+      catch(err){
+        console.error("Got error while deleting the blog", err);
+      }
+      finally{
+        setDeleteLoading(false)
+      }
+    }
     return (
         <div>
-            {console.log("post Loading: ",`${VITE_API_URL}/uploads${post?.titleImage}`)}
-            {loading && <h1 className="text-center">Loading..</h1>}
+            {console.log("processed content dom" , processedContent)}
+            {loading && deleteLoading && <h1 className="text-center">processing..</h1>}
             <div className={`${loading && 'hidden'}`}>
                 <button onClick={(e) => handleEditPost(e, post._id)} className="shadow-2xl rounded-lg hover:bg-gray-200"> <MdEdit /> </button>
-                <button className="border hover:bg-gray-200"> <MdDelete /> </button>
+                <button onClick={(e) => handleDelete(e, post._id)} className="border hover:bg-gray-200"> <MdDelete /> </button>
             </div>
             <h2 className="strong font-bold border-b border-green-500 shadow-full">{post?.title} </h2>
             <div className={`h-screen p-2 ${loading ? 'bg-transparent' : 'bg-gray-100'}  `}>

@@ -39,12 +39,20 @@ const DisplayBlogs = () => {
         clearLocalStorage();
         loadAllBlogs();
     },[])
-
+    function shortContent(data){
+        if(typeof data !== 'string' || !data) return;
+        const words = data.trim().split(/\s+/);
+        console.log('words: ', words);
+        const myShortData = words.slice(0,20).join(' ');
+        console.log("myShortData ", myShortData);
+        return myShortData;
+    }
     const handlePostClick = (e, id) => {
         alert("post clicked ");
         navigateTo(`/post/${id}`);
     }
     if(loading) return <h2> Loding blogs..</h2>
+    
     return (
        <>
             <div className="flex w-full flex-wrap gap-5 bg-pink-400 p-10 justify-center">
@@ -60,7 +68,7 @@ const DisplayBlogs = () => {
                                 <span className="font-bold">Title Image</span>
                                 <img src={`${VITE_API_URL}/uploads/${blog?.titleImage}`} alt={blog.title} className="w-44 h-auto" />
                                 <h5 className="font-bold">Body</h5>
-                                <h4>{blog.content[0].textContent || blog.content[0]} </h4>
+                                <p>{shortContent(blog.content[0].textContent) || shortContent(blog.content[0].textContent)}.. </p>
                             </div>
                         </div>
                     )

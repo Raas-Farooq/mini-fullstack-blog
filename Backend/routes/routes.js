@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, allUsers, loginUser, createBlog, allBlogs, accessPost, updateBlog } from '../controller/controller.js';
+import { registerUser, allUsers, loginUser, createBlog, allBlogs, accessPost, updateBlog, deleteBlog } from '../controller/controller.js';
 import {body} from 'express-validator';
 import { loginValidation, registerValidation, createBlogValidation } from '../validators/authValidators.js';
 import { upload } from './uploads.js';
@@ -18,6 +18,7 @@ router.post('/createBlog', upload.single('titleImage'), (req,res,next) => {
     next();
 },
     createBlogValidation, createBlog);
+router.delete('/deleteBlog/:id', deleteBlog);
 router.put('/updateBlog/:id', upload.single('titleImage'), updateBlog);
 router.post('/uploadContentImage', upload.single('contentImage'),uploadContentImage);
 router.get('/accessPost/:id', accessPost);

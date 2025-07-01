@@ -186,7 +186,7 @@ const allBlogs = async(req,res) => {
 
         return res.status(200).json({
             success:true,
-            message:"Successfully deleted the blogs",
+            message:"Successfully fetched the blogs",
             blogs
         })
     }
@@ -284,6 +284,33 @@ const allUsers = async(req,res) => {
     }
 }
 
-export {registerUser, allUsers, loginUser, createBlog,allBlogs, accessPost, updateBlog};
+const deleteBlog = async(req,res) => {
+    
+    const {id} = req.params;
+
+    const blog = await postModel.findById({_id:id});
+    if(!blog){
+        return res.status(404).json({
+            success:false,
+            message:'Blog not found'
+
+        })
+    }
+   try{
+     await postModel.deleteOne(blog);
+        return res.status(200).json({
+            success:true,
+            message:'successfully deleted the blog',
+            blog
+        })
+   }catch(err){
+     return res.status(500).json({
+            success:false,
+            message:"Server error while deleting Post",
+            error:err.message
+        })
+   }
+}
+export {registerUser, allUsers, loginUser, createBlog,allBlogs, accessPost, updateBlog,deleteBlog};
 
 
